@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: myapp
 spec:
+  replicas: 1
+  strategy:
+    type: Recreate 
   selector:
     matchLabels:
       app: myapp
@@ -22,7 +25,8 @@ spec:
         volumeMounts:
           - mountPath: /var/mydata
             name: my-data-pv
+#      nodeSelector: 
       volumes:
         - name: my-data-pv
           persistentVolumeClaim:
-            claimName: mypvc
+            claimName: testing-pvc-az 
