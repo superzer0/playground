@@ -1,32 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myapp
+  name: test-dep-{{ .Release.Name }}
 spec:
   replicas: 1
   strategy:
     type: Recreate 
   selector:
     matchLabels:
-      app: myapp
+      app: test-dep-{{ .Release.Name }}
   replicas: 1
   template:
     metadata:
       labels:
-        app: myapp
+        app: test-dep-{{ .Release.Name }}
     spec:
       containers:
-      - name: myapp
+      - name: test-dep-{{ .Release.Name }}
         image: nginx:latest
         resources:
           limits:
             memory: "128Mi"
-            cpu: "500m"
+            cpu: "200m"
         volumeMounts:
           - mountPath: /var/mydata
             name: my-data-pv
-#      nodeSelector: 
       volumes:
         - name: my-data-pv
           persistentVolumeClaim:
-            claimName: testing-pvc-az 
+            claimName: test-pvc-{{ .Release.Name }}
