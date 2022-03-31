@@ -3,12 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: test-pvc-{{ .Release.Name }}
 spec:
-  storageClassName: {{ .Values.global.sc-name }}
+  storageClassName: {{ .Values.global.storageClassName }}
   resources:
     requests:
       storage: 5M
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
-
-
