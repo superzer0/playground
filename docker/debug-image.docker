@@ -1,0 +1,31 @@
+FROM ubuntu:jammy
+
+RUN set -x && apt-get update
+
+RUN (echo y; echo y; echo y; echo y) | unminimize
+    
+# install *.UTF-8 locales otherwise some apps get trouble
+RUN apt-get -y install locales && locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8 
+
+# install other utilities
+RUN apt-get -y install \
+        apt-transport-https \
+        bash-completion vim less man jq bc \
+        lsof tree psmisc htop lshw sysstat dstat \
+        iproute2 iputils-ping iptables dnsutils traceroute \
+        netcat curl wget nmap socat netcat-openbsd rsync \
+        net-tools \
+        p7zip-full \
+        nmap \
+        tree \
+        binutils acl pv \
+        strace tcpdump
+# enable bash-completeion for root user (other users works by default)
+RUN (echo '[ -f /etc/bash_completion ] && ! shopt -oq posix && . /etc/bash_completion') >> ~/.bashrc
+
+RUN alias ls="ls -alh"
+RUN alias l="ls -lh"
+RUN alias listening="lsof -i -P | grep -i 'listen'"
+
+# set LANG=*.UTF-8 so that default file encoding will be UTF-8, otherwise any non-ASCII files may have trouble.
+ENV LANG=C.UTF-8
