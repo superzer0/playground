@@ -13,6 +13,8 @@ metadata:
   name: myapp-with-pvc
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: myapp-with-pvc
@@ -28,7 +30,8 @@ spec:
         runAsNonRoot: true
       containers:
         - name: myapp-with-pvc
-          image: gcr.io/kuar-demo/kuard-amd64:blue
+          image: superzer0/debug-container:latest
+          command: ["sh", "-c", "sleep 1h"]
           resources:
             limits:
               memory: "128Mi"
@@ -41,16 +44,16 @@ spec:
       volumes:
         - name: shared-volume
           persistentVolumeClaim:
-            claimName: myapp-pvc-hostpath
+            claimName: myapp-pvc
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: myapp-pvc-hostpath
+  name: myapp-pvc
 spec:
   resources:
     requests:
       storage: 100M
   accessModes:
-    - ReadWriteMany
-  storageClassName: hostpath
+    - ReadWriteOnce
+  storageClassName: managed-csi # hostpath, azurefile-csi, managed-csi
