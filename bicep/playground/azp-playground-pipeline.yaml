@@ -1,0 +1,21 @@
+name: Playground deployment JKA
+pr: none
+trigger: none
+
+pool:
+  vmImage: "windows-latest"
+
+jobs:
+  - job: "deploy"
+    steps:
+      - task: AzurePowerShell@5
+        inputs:
+          pwsh: true
+          failOnStderr: true
+          ConnectedServiceNameARM: "apollo-jka-westeurope"
+          TargetAzurePs: "latestVersion"
+          scriptType: "inlineScript"
+          inline: |
+            . $(Build.SourcesDirectory)/infrastructure/scripts/modules/playground/deploy.ps1
+            DeployPowershell
+
