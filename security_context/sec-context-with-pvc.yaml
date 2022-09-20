@@ -6,6 +6,17 @@
 # reclaimPolicy: Retain
 # volumeBindingMode: WaitForFirstConsumer 
 
+## --- # Azure based storage class 
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: test-jka
+# parameters:
+#   skuname: StandardSSD_LRS
+# provisioner: disk.csi.azure.com
+# reclaimPolicy: Retain
+# volumeBindingMode: WaitForFirstConsumer
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -56,4 +67,4 @@ spec:
       storage: 100M
   accessModes:
     - ReadWriteOnce
-  storageClassName: managed-csi # hostpath, azurefile-csi, managed-csi
+  storageClassName: managed-csi # hostpath, azurefile-csi, managed-csi, test-jka
