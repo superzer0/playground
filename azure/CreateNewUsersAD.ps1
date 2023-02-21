@@ -1,4 +1,4 @@
-$ADdomain = 'leapworkapollotest.onmicrosoft.com'
+$ADdomain = ''
 function CreateNewUser {
   param(
     [string] $userName
