@@ -56,7 +56,7 @@ resource vnetApp 'Microsoft.Network/virtualNetworks@2022-07-01' = {
     }
     subnets: [
       {
-        name: 'snet-App'
+        name: 'ApplicationSubnet'
         properties: {
           addressPrefix: '10.224.32.0/21'
           privateEndpointNetworkPolicies: 'Disabled'
@@ -84,7 +84,7 @@ resource vnetTech 'Microsoft.Network/virtualNetworks@2022-07-01' = {
     }
     subnets: [
       {
-        name: 'snet-tech'
+        name: 'ApplicationSubnet'
         properties: {
           addressPrefix: '10.224.16.0/21'
           privateEndpointNetworkPolicies: 'Disabled'

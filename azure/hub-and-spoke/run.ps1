@@ -27,7 +27,7 @@ function DeployHub {
 
 function DeploySpokes {
   az account set --subscription $subId
-  az deployment group create -f $PSScriptRoot/hub.bicep `
+  az deployment group create -f $PSScriptRoot/spokes.bicep `
       -g $rgName `
       --mode Incremental `
       --verbose `
