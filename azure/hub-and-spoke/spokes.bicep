@@ -60,6 +60,7 @@ resource vnetApp 'Microsoft.Network/virtualNetworks@2022-07-01' = {
         properties: {
           addressPrefix: '10.224.32.0/21'
           privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Disabled'
           routeTable: {
             id: forceFirewallRouteTable.id
           }
@@ -88,6 +89,7 @@ resource vnetTech 'Microsoft.Network/virtualNetworks@2022-07-01' = {
         properties: {
           addressPrefix: '10.224.16.0/21'
           privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Disabled'
           routeTable: {
             id: forceFirewallRouteTable.id
           }
