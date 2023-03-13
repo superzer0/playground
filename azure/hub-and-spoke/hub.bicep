@@ -157,7 +157,7 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2022-07-01' = {
       }
     ]
     sku: {
-      tier: 'Premium'
+      tier: 'Standard'
     }
     firewallPolicy: {
       id: hub_policy.id

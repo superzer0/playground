@@ -41,6 +41,26 @@ resource forceFirewallRouteTable 'Microsoft.Network/routeTables@2022-07-01' = {
   tags: tags
 }
 
+resource routeInternalTrafficViaFirewallRouteTable 'Microsoft.Network/routeTables@2022-07-01' = {
+  name: 'rt-${workloadName}-route-hub'
+  location: location
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'Internal-Firewall-Route'
+        properties: {
+          addressPrefix: '10.224.0.0/12'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: firewallPrivateIp
+          hasBgpOverride: false
+        }
+      }
+    ]
+  }
+  tags: tags
+}
+
 resource vnetApp 'Microsoft.Network/virtualNetworks@2022-07-01' = {
   name: 'vnet-${workloadName}-app'
   location: location
@@ -99,6 +119,35 @@ resource vnetTech 'Microsoft.Network/virtualNetworks@2022-07-01' = {
   }
 }
 
+resource vnetAppGateway 'Microsoft.Network/virtualNetworks@2022-07-01' = {
+  name: 'vnet-${workloadName}-appgateway'
+  location: location
+  tags: tags
+  properties: {
+    dhcpOptions: {
+      dnsServers: [
+        firewallPrivateIp
+      ]
+    }
+    addressSpace: {
+      addressPrefixes: [ '10.224.112.0/20' ]
+    }
+    subnets: [
+      {
+        name: 'AppGateway'
+        properties: {
+          addressPrefix: '10.224.112.0/24'
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Disabled'
+          routeTable: {
+            id: routeInternalTrafficViaFirewallRouteTable.id
+          }
+        }
+      }
+    ]
+  }
+}
+
 // ######### PEERINGS ########
 
 resource vnetAppToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = {
@@ -144,6 +193,34 @@ resource vnetTechToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings
 
 resource vnetHubToTech 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = {
   name: 'peer-${vnetHub.name}-${vnetTech.name}'
+  parent: vnetHub
+  properties: {
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    allowGatewayTransit: true
+    useRemoteGateways: false
+    remoteVirtualNetwork: {
+      id: vnetTech.id
+    }
+  }
+}
+
+resource vnetAppGatewayToHub 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = {
+  name: 'peer-${vnetAppGateway.name}-${vnetHub.name}'
+  parent: vnetAppGateway
+  properties: {
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    allowGatewayTransit: false
+    useRemoteGateways: true
+    remoteVirtualNetwork: {
+      id: vnetHub.id
+    }
+  }
+}
+
+resource vnetHubToAppGateway 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2022-07-01' = {
+  name: 'peer-${vnetHub.name}-${vnetAppGateway.name}'
   parent: vnetHub
   properties: {
     allowVirtualNetworkAccess: true

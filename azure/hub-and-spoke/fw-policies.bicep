@@ -9,17 +9,13 @@ var tags = {
 }
 
 resource hub_policy 'Microsoft.Network/firewallPolicies@2022-07-01' = {
-  name: 'afwp-${workloadName}-hub'
+  name: 'afwp-${workloadName}-hub-standard'
   location: location
   tags: tags
   properties: {
     sku: {
-      tier: 'Premium'
+      tier: 'Standard'
     }
-    intrusionDetection: {
-      mode: 'Alert'
-    }
-    threatIntelMode: 'Alert'
     dnsSettings: {
       enableProxy: true
     }
@@ -80,3 +76,42 @@ resource vpnCollectionGroup 'Microsoft.Network/firewallPolicies/ruleCollectionGr
   }
 }
 
+resource appGatewayCollectionGroup 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2022-07-01' = {
+  parent: hub_policy
+  name: 'app-gateway'
+  dependsOn:[
+    vpnCollectionGroup
+  ]
+  properties: {
+    priority: 500
+    ruleCollections: [
+      {
+        ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
+        name: 'app-gateway-global'
+        priority: 501
+        action: {
+          type: 'Allow'
+        }
+        rules: [
+          {
+            name: 'allow-app-gateway-traffic'
+            ruleType: 'NetworkRule'
+            description: 'Allow traffic originating at application gateway'
+            ipProtocols: [
+              'Any'
+            ]
+            destinationAddresses: [
+              '10.224.0.0/12'
+            ]
+            destinationPorts: [
+              '*'
+            ]
+            sourceAddresses: [
+              '10.224.112.0/24'
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
