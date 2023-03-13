@@ -228,7 +228,7 @@ resource vnetHubToAppGateway 'Microsoft.Network/virtualNetworks/virtualNetworkPe
     allowGatewayTransit: true
     useRemoteGateways: false
     remoteVirtualNetwork: {
-      id: vnetTech.id
+      id: vnetAppGateway.id
     }
   }
 }
