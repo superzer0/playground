@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  template:
+    metadata:
+      labels:
+        app: httpbin
+    spec:
+      containers:
+      - name: httpbin
+        image: docker.io/kennethreitz/httpbin
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin-svc
+spec:
+  selector:
+    app: httpbin
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpbin-cert-test
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - TODO
+    secretName: TODO
+  rules:
+  - host: TODO
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend: 
+            service:
+              name: httpbin-svc
+              port:
+                name: http 
+    
