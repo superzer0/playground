@@ -1,2 +1,2 @@
 global:
-  storageClassName: apollo-sc
+  storageClassName: default

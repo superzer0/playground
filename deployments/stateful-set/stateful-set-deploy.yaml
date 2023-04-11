@@ -33,7 +33,7 @@ spec:
       terminationGracePeriodSeconds: 10 
       containers:
       - name: nginx
-        image: "gcr.io/google_containers/nginx-slim:0.8"
+        image: "ginx:latest"
         ports:
           - containerPort: 80
             name: web
@@ -45,7 +45,7 @@ spec:
       name: www
     spec: 
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: apollo-sc
+      storageClassName: default
       resources:
         requests:
           storage: 1Gi 
