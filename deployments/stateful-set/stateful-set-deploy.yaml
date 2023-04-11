@@ -33,7 +33,7 @@ spec:
       terminationGracePeriodSeconds: 10 
       containers:
       - name: nginx
-        image: "ginx:latest"
+        image: "nginx:stable-alpine3.17-slim"
         ports:
           - containerPort: 80
             name: web

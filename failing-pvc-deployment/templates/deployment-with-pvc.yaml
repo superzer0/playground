@@ -19,7 +19,7 @@ spec:
         agentpool: agentpool
       containers:
       - name: test-dep-{{ .Release.Name }}
-        image: nginx:latest
+        image: nginx:stable-alpine3.17-slim
         resources:
           limits:
             memory: "128Mi"
