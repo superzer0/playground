@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testing-container
+spec:
+  selector:
+    matchLabels:
+      app: testing-container
+  template:
+    metadata:
+      labels:
+        app: testing-container
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: <NAME>
+      containers:
+      - name: testing-container
+        image: superzer0/debug-container
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        
