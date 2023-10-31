@@ -1,0 +1,126 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual network name"
+      }
+    },
+    "firstSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "First subnet name"
+      }
+    },
+    "secondSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Second subnet name"
+      }
+    },
+    "env": {
+      "type": "string",
+      "metadata": {
+        "description": "Environment name"
+      }
+    },
+    "regCode": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure region code"
+      }
+    }
+  },
+  "functions": [
+    {
+      "namespace": "myFunctions",
+      "members": {
+        "saName": {
+          "parameters": [
+            {
+              "name": "env",
+              "type": "string"
+            },
+            {
+              "name": "regCode",
+              "type": "string"
+            }
+          ],
+          "output": {
+            "type": "string",
+            "value": "[concat('satest', parameters('env'), parameters('regCode'))]"
+          }
+        }
+      }
+    }
+  ],
+  "variables": {
+    "owner": "jka@leapwork.com"
+  },
+  "resources": [
+    {
+      "name": "[parameters('vnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2023-04-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "[parameters('vnetName')]",
+        "owner": "[variables('owner')]",
+        "env": "[concat(parameters('env'), '-', parameters('regCode'))]"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('firstSubnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24"
+            }
+          },
+          {
+            "name": "[parameters('secondSubnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.1.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[myFunctions.saName(parameters('env'), parameters('regCode'))]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "tags": {
+        "displayName": "[myFunctions.saName(parameters('env'), parameters('regCode'))]",
+        "owner": "[variables('owner')]",
+        "env": "[myFunctions.saName(parameters('env'), parameters('regCode'))]"
+      },
+      "location": "[resourceGroup().location]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      }
+    }
+  ],
+  "outputs": {
+    "vnetId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+    },
+    "saId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', myFunctions.saName(parameters('env'), parameters('regCode')))]"
+    },
+    "saPrimaryEndpoint": {
+      "type": "object",
+      "value": "[reference(myFunctions.saName(parameters('env'), parameters('regCode'))).primaryEndpoints]"
+    }
+  }
+}

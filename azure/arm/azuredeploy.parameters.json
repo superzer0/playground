@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName": {
+            "value": "testVnet"
+        },
+        "firstSubnetName": {
+            "value": "firstSubnet"
+
+        },
+        "secondSubnetName": {
+            "value": "secondSubnet"
+        },
+        "env": {
+            "value": "jka"
+        },
+        "regCode": {
+            "value": "we"
+        }
+    }
+}
