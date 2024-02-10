@@ -22,8 +22,17 @@ param parVnetName string
 @description('subnet name')
 param parSubnetName string
 
+@description('Load balancer name')
+param parLbName string
+
+@description('Load balancer pool name')
+param parLbPoolName string
+
 @secure()
 param adminPublicKey string
+
+@description('Custom data to initialize the VM with')
+param cloudInitContent string = ''
 
 resource resVnet 'Microsoft.Network/virtualNetworks@2023-06-01' existing = {
   name: parVnetName
@@ -48,6 +57,11 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2022-11-01' = {
             id: resSubnet.id
           }
           privateIPAllocationMethod: 'Dynamic'
+          loadBalancerBackendAddressPools: [
+            {
+              id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parLbName, parLbPoolName)
+            }
+          ]
         }
       }
     ]
@@ -88,6 +102,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-11-01' = {
         }
       ]
     }
+    userData: empty(cloudInitContent) ? null : cloudInitContent
     additionalCapabilities: {
       hibernationEnabled: false
     }
@@ -115,4 +130,3 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-11-01' = {
     }
   }
 }
-
