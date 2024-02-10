@@ -48,6 +48,7 @@ var varVmName = 'vm-${parVmIdentifier}-${parNameSuffix}'
 resource networkInterface 'Microsoft.Network/networkInterfaces@2022-11-01' = {
   name: 'nic-${varVmName}'
   location: parLocation
+  tags: parTags
   properties: {
     ipConfigurations: [
       {

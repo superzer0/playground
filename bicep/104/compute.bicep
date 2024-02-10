@@ -38,3 +38,23 @@ module modVMs 'vm.bicep' = [for vmProperties in vmsToCreate: {
     parLbPoolName: 'common-pool'
   }
 }]
+
+resource sa 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: 'sanetsandbboxjkasdc'
+  location: parLocation
+  tags: parTags
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    dnsEndpointType: 'Standard'
+    publicNetworkAccess: 'Enabled'
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+    allowCrossTenantReplication: false
+    allowSharedKeyAccess: true
+    supportsHttpsTrafficOnly: true
+    accessTier: 'Cool'
+  }
+}

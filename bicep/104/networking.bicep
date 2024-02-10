@@ -10,6 +10,90 @@ param parNameSuffix string
 @description('Tags')
 param parTags object
 
+var nsgRulesDefault = [ {
+    name: 'AllowAllHttp'
+    properties: {
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      sourceAddressPrefix: 'Internet'
+      destinationPortRange: '80'
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 100
+      direction: 'Inbound'
+    }
+  }
+  {
+    name: 'AllowSshHttp'
+    properties: {
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      sourceAddressPrefix: 'Internet'
+      destinationPortRange: '22'
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 110
+      direction: 'Inbound'
+    }
+  } ]
+
+resource nsgWeb 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
+  name: 'nsg-web-${parNameSuffix}'
+  location: parLocation
+  properties: {
+    securityRules: concat(
+      nsgRulesDefault, []
+    )
+  }
+}
+
+resource nsgBackend 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
+  name: 'nsg-backend-${parNameSuffix}'
+  location: parLocation
+  properties: {
+    securityRules: concat(
+      nsgRulesDefault, []
+    )
+  }
+}
+
+resource nsgDB 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
+  name: 'nsg-db-${parNameSuffix}'
+  location: parLocation
+  properties: {
+    securityRules: concat(
+      nsgRulesDefault, [
+        // {
+        //   name: 'BlockFromVnet'
+        //   properties: {
+        //     protocol: 'Tcp'
+        //     sourcePortRange: '*'
+        //     sourceAddressPrefix: 'VirtualNetwork'
+        //     destinationPortRange: '*'
+        //     destinationAddressPrefix: 'VirtualNetwork'
+        //     access: 'Deny'
+        //     priority: 200
+        //     direction: 'Inbound'
+        //   }
+        // }
+        // {
+        //   name: 'AllowFromBackend'
+        //   properties: {
+        //     protocol: 'Tcp'
+        //     sourcePortRange: '*'
+        //     sourceAddressPrefix: cidrSubnet(vNetAddressPrefix, 24, 1)
+        //     destinationPortRange: '*'
+        //     destinationAddressPrefix: 'VirtualNetwork'
+        //     access: 'Deny'
+        //     priority: 150
+        //     direction: 'Inbound'
+        //   }
+        // }
+      ]
+    )
+  }
+}
+
 var vNetAddressPrefix = '10.0.0.0/18' // 10.0.0.0 - 10.0.63.254
 resource vNet 'Microsoft.Network/virtualNetworks@2023-06-01' = {
   name: 'vnet-${parNameSuffix}'
@@ -26,24 +110,51 @@ resource vNet 'Microsoft.Network/virtualNetworks@2023-06-01' = {
         name: 'web'
         properties: {
           addressPrefix: cidrSubnet(vNetAddressPrefix, 24, 0)
+          networkSecurityGroup: {
+            id: nsgWeb.id
+          }
         }
       }
       {
         name: 'backend'
         properties: {
           addressPrefix: cidrSubnet(vNetAddressPrefix, 24, 1)
+          networkSecurityGroup: {
+            id: nsgBackend.id
+          }
         }
       }
       {
         name: 'db'
         properties: {
           addressPrefix: cidrSubnet(vNetAddressPrefix, 24, 2)
+          networkSecurityGroup: {
+            id: nsgDB.id
+          }
         }
       }
     ]
   }
   tags: parTags
 }
+
+// resource rtWebViaBackend 'Microsoft.Network/routeTables@2023-09-01' = {
+//   name: 'rt-web-via-backend'
+//   tags: parTags
+//   location: parLocation
+//   properties: {
+//     routes: [
+//       {
+//         name: 'fwd-via-backend'
+//         properties: {
+//           addressPrefix: cidrSubnet(vNetAddressPrefix, 24, 2)
+//           nextHopType: 'VirtualAppliance'
+//           nextHopIpAddress: cidrHost(cidrSubnet(vNetAddressPrefix, 24, 1), 3)
+//         }
+//       }
+//     ]
+//   }
+// }
 
 var varPipLbName = 'pip-lb-${parNameSuffix}'
 resource lbPip 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
@@ -98,7 +209,7 @@ resource publicLb 'Microsoft.Network/loadBalancers@2023-09-01' = {
           frontendPort: 80
           backendPort: 80
           enableFloatingIP: false
-          idleTimeoutInMinutes: 15
+          idleTimeoutInMinutes: 4
           protocol: 'Tcp'
           enableTcpReset: true
           loadDistribution: 'Default'
@@ -112,6 +223,72 @@ resource publicLb 'Microsoft.Network/loadBalancers@2023-09-01' = {
           probe: {
             id: resourceId('Microsoft.Network/loadBalancers/probes', varLbName, varWebBackendPoolProbe)
           }
+        }
+      }
+    ]
+    inboundNatRules: [
+      {
+        name: 'direct-ssh-web'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', varLbName, varLbFrontendName)
+          }
+          frontendPort: 2001
+          backendPort: 22
+          enableFloatingIP: false
+          idleTimeoutInMinutes: 4
+          protocol: 'Tcp'
+          enableTcpReset: true
+
+        }
+      }
+      {
+        name: 'direct-ssh-backend'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', varLbName, varLbFrontendName)
+          }
+          frontendPort: 2002
+          backendPort: 22
+          enableFloatingIP: false
+          idleTimeoutInMinutes: 4
+          protocol: 'Tcp'
+          enableTcpReset: true
+
+        }
+      }
+      {
+        name: 'direct-ssh-db'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', varLbName, varLbFrontendName)
+          }
+          frontendPort: 2003
+          backendPort: 22
+          enableFloatingIP: false
+          idleTimeoutInMinutes: 4
+          protocol: 'Tcp'
+          enableTcpReset: true
+
+        }
+      }
+    ]
+    outboundRules: [
+      {
+        name: 'standard-outbound'
+        properties: {
+          backendAddressPool: {
+            id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', varLbName, varWebBackendPool)
+          }
+          frontendIPConfigurations: [
+            {
+              id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', varLbName, varLbFrontendName)
+            }
+          ]
+          protocol: 'All'
+          enableTcpReset: true
+          idleTimeoutInMinutes: 4
+          allocatedOutboundPorts: 32 // only for testing
         }
       }
     ]
