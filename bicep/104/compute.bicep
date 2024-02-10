@@ -39,8 +39,18 @@ module modVMs 'vm.bicep' = [for vmProperties in vmsToCreate: {
   }
 }]
 
-resource sa 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: 'sanetsandbboxjkasdc'
+resource vnetRef 'Microsoft.Network/virtualNetworks@2023-09-01' existing = {
+  name: varVnetName
+}
+
+resource subnetBackendRef 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' existing = {
+  name: 'backend'
+  parent: vnetRef
+}
+
+var varSaBackendName = 'sanetsandbboxjkasdc'
+resource saBackend 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: varSaBackendName
   location: parLocation
   tags: parTags
   sku: {
@@ -56,5 +66,35 @@ resource sa 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     allowSharedKeyAccess: true
     supportsHttpsTrafficOnly: true
     accessTier: 'Cool'
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      virtualNetworkRules: [
+        {
+          id: subnetBackendRef.id
+          action: 'Allow'
+        }
+      ]
+    }
+  }
+}
+
+// this needs to be linked to the subnet with az cli/powershell.
+resource sepBackend 'Microsoft.Network/serviceEndpointPolicies@2023-09-01' = {
+  name: 'sep-vnet-backend-${parNameSuffix}'
+  location: parLocation
+  properties: {
+    serviceEndpointPolicyDefinitions: [
+      {
+        name: 'sep-def-${varSaBackendName}'
+        properties: {
+          service: 'Microsoft.Storage'
+          serviceResources: [
+            saBackend.id
+          ]
+          description: 'Storage service endpoint policy from "backend" subnet to ${varSaBackendName}'
+        }
+      }
+    ]
   }
 }
