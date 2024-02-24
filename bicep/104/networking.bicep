@@ -244,7 +244,7 @@ resource publicLb 'Microsoft.Network/loadBalancers@2023-09-01' = {
           idleTimeoutInMinutes: 4
           protocol: 'Tcp'
           enableTcpReset: true
-          backendAddressPool: {
+          backendIPConfiguration: {
             id: resourceId('Microsoft.Network/networkInterfaces/ipConfigurations', 'nic-vm-web-netsandbox-${parNameSuffix}', 'ipconfig1')
           }
         }
@@ -261,7 +261,7 @@ resource publicLb 'Microsoft.Network/loadBalancers@2023-09-01' = {
           idleTimeoutInMinutes: 4
           protocol: 'Tcp'
           enableTcpReset: true
-          backendAddressPool: {
+          backendIPConfiguration: {
             id: resourceId('Microsoft.Network/networkInterfaces/ipConfigurations', 'nic-vm-backend-netsandbox-${parNameSuffix}', 'ipconfig1')
           }
         }
@@ -278,7 +278,7 @@ resource publicLb 'Microsoft.Network/loadBalancers@2023-09-01' = {
           idleTimeoutInMinutes: 4
           protocol: 'Tcp'
           enableTcpReset: true
-          backendAddressPool: {
+          backendIPConfiguration: {
             id: resourceId('Microsoft.Network/networkInterfaces/ipConfigurations', 'nic-vm-db-netsandbox-${parNameSuffix}', 'ipconfig1')
           }
         }

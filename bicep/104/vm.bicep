@@ -129,5 +129,10 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2022-11-01' = {
         vTpmEnabled: true
       }
     }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
   }
 }
