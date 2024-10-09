@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-dep-{{ .Release.Name }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: test-dep-{{ .Release.Name }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: test-dep-{{ .Release.Name }}
+    spec:
+      nodeSelector:
+        agentpool: agentpool
+      containers:
+      - name: test-dep-{{ .Release.Name }}
+        image: nginx:stable-alpine3.17-slim
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        volumeMounts:
+          - mountPath: /var/mydata
+            name: my-data-pv
+      volumes:
+        - name: my-data-pv
+          persistentVolumeClaim:
+            claimName: test-pvc-{{ .Release.Name }}

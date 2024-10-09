@@ -1,2 +1,3 @@
-# k8s-playground
-Helm and K8S playground 
+# playground
+
+K8S, .NET and Azure playground
