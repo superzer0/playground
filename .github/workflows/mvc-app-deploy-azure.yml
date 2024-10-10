@@ -5,7 +5,7 @@ on:
 
 #Environment variables https://docs.github.com/en/actions/learn-github-actions/environment-variables
 env:
-  TEMPLATE-FILE: infra/webapp.bicep
+  TEMPLATE-FILE: dotnet/mvc-app/infra/webapp.bicep
 
 jobs:
   #Build, test and publish .net web project in repository
