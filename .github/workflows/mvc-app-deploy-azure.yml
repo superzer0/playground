@@ -7,6 +7,12 @@ on:
 env:
   TEMPLATE-FILE: dotnet/mvc-app/infra/webapp.bicep
 
+permissions:
+  contents:  read
+  deployments:  write
+  checks: write
+  id-token: write
+
 jobs:
   #Build, test and publish .net web project in repository
   deploy-build:
