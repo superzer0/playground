@@ -6,10 +6,17 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents:  read
+  deployments:  write
+  checks: write
+
 on:
   workflow_dispatch: {}
   push:
     branches: [ $default-branch ]
+  pull_request:
+      branches: [ $default-branch ]
 
 jobs:
   build:
@@ -27,7 +34,7 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Set up dependency caching for faster builds
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
