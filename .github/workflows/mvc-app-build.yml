@@ -7,10 +7,7 @@ defaults:
     shell: bash
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch: {}
 
 jobs:
   build:
@@ -19,15 +16,30 @@ jobs:
         working-directory: ./dotnet/mvc-app
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Show directory tree
+      run: tree
+    - uses: actions/checkout@v4.2.1
+      name: 'Checkout'
+      with:
+        show-progress: true
+        fetch-depth: 1
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
-
+    - name: sth
+      env:
+        my_var: ${{ vars.MY_VAR}}
+        token: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo 'Using context variables: ${{  github.workflow }} ${{ vars.MY_VAR  }} ${{ runner.name }}'
+        echo "Using runner variables: $GITHUB_ACTION $GITHUB_REPOSITORY $GITHUB_WORKFLOW $my_var $token"
+        echo "Runner info: $RUNNER_OS $RUNNER_TEMP $RUNNER_NAME"
     - name: Build
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Show directory tree
+      run: tree
