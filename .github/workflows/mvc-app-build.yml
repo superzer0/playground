@@ -14,18 +14,15 @@ permissions:
 on:
   workflow_dispatch: {}
   push:
-    branches: [ $default-branch ]
+    branches: [ main ]
   pull_request:
       branches:
         - main
-
 jobs:
   build:
     name: Build MVC App
     runs-on: ubuntu-latest
     steps:
-    - name: Show directory tree
-      run: tree
     - uses: actions/checkout@v4.2.1
       name: 'Checkout'
       with:
