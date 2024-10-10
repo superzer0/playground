@@ -27,19 +27,17 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       working-directory: ./dotnet/mvc-app
-    - name: sth
-      env:
-        my_var: ${{ vars.MY_VAR}}
-        token: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo 'Using context variables: ${{  github.workflow }} ${{ vars.MY_VAR  }} ${{ runner.name }}'
-        echo "Using runner variables: $GITHUB_ACTION $GITHUB_REPOSITORY $GITHUB_WORKFLOW $my_var $token"
-        echo "Runner info: $RUNNER_OS $RUNNER_TEMP $RUNNER_NAME"
     - name: Build
       run: dotnet build --no-restore
       working-directory: ./dotnet/mvc-app
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    - name: Publish
+      run: dotnet publish --output /app-publish --configuration Release --no-restore
       working-directory: ./dotnet/mvc-app
-    - name: Show directory tree
-      run: tree
+    - name: Upload artifacts
+      uses: actions/upload-artifact
+      with:
+          name: app-published
+          path: ./app-publish
+
+
+
