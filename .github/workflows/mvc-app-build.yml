@@ -11,9 +11,6 @@ on:
 
 jobs:
   build:
-    defaults:
-      run:
-        working-directory: ./dotnet/mvc-app
     runs-on: ubuntu-latest
     steps:
     - name: Show directory tree
@@ -29,6 +26,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: ./dotnet/mvc-app
     - name: sth
       env:
         my_var: ${{ vars.MY_VAR}}
@@ -39,7 +37,9 @@ jobs:
         echo "Runner info: $RUNNER_OS $RUNNER_TEMP $RUNNER_NAME"
     - name: Build
       run: dotnet build --no-restore
+      working-directory: ./dotnet/mvc-app
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      working-directory: ./dotnet/mvc-app
     - name: Show directory tree
       run: tree
