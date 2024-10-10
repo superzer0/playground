@@ -31,13 +31,13 @@ jobs:
       run: dotnet build --no-restore
       working-directory: ./dotnet/mvc-app
     - name: Publish
-      run: dotnet publish --output /app-publish --configuration Release --no-restore
+      run: dotnet publish --output $GITHUB_WORKSPACE/app-publish --configuration Release --no-restore
       working-directory: ./dotnet/mvc-app
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: app-published
-        path: ./app-publish
+        path: '${{ github.workspace}}/app-publish'
 
 
 
