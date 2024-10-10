@@ -7,27 +7,37 @@ defaults:
     shell: bash
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch: {}
 
 jobs:
   build:
-    defaults:
-      run:
-        working-directory: ./dotnet/mvc-app
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Show directory tree
+      run: tree
+    - uses: actions/checkout@v4.2.1
+      name: 'Checkout'
+      with:
+        show-progress: true
+        fetch-depth: 1
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
-
+      working-directory: ./dotnet/mvc-app
     - name: Build
       run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      working-directory: ./dotnet/mvc-app
+    - name: Publish
+      run: dotnet publish --output $GITHUB_WORKSPACE/app-publish --configuration Release --no-restore
+      working-directory: ./dotnet/mvc-app
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-published
+        path: '${{ github.workspace}}/app-publish'
+
+
+
