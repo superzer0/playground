@@ -20,6 +20,7 @@ on:
 
 jobs:
   build:
+    name: Build MVC App
     runs-on: ubuntu-latest
     steps:
     - name: Show directory tree
