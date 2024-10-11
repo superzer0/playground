@@ -2,13 +2,26 @@ name: 🔒 mvc-app-build-tmpl.yaml
 
 on:
   workflow_call:
+    inputs:
+      dockerBuildEnabled:
+        description: 'Enable docker build'
+        type: boolean
+        default: true
+        required: false
+    outputs:
+      full_image_name:
+        value: ${{ jobs.build.outputs.full_image_name }}
 
 jobs:
   build:
     permissions:
       contents:  read
+      packages: write
     env:
       TEMPLATE-FILE: dotnet/mvc-app/infra/webapp.bicep
+      FULL_IMAGE_NAME: 'ghcr.io/${{github.repository}}-mvc-app:${{ github.sha  }}'
+    outputs:
+      full_image_name: ${{ env.FULL_IMAGE_NAME }}
     name: Build for Deployment
     runs-on: ubuntu-latest
     steps:
@@ -30,6 +43,13 @@ jobs:
       working-directory: ./dotnet/mvc-app
     - name: Publish
       run: dotnet publish --output $GITHUB_WORKSPACE/app-publish --configuration Release --no-restore
+      working-directory: ./dotnet/mvc-app
+    - name: Docker build
+      if: ${{ inputs.dockerBuildEnabled }}
+      run: docker build . --file Dockerfile --tag ${{ env.FULL_IMAGE_NAME}}
+    - name: Docker push
+      if: ${{ inputs.dockerBuildEnabled }}
+      run: docker push ${{ env.FULL_IMAGE_NAME}}
       working-directory: ./dotnet/mvc-app
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

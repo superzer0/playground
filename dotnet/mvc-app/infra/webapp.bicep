@@ -2,6 +2,7 @@ param webAppName string = uniqueString(resourceGroup().id) // Generate unique St
 param sku string = 'B1' // The SKU of App Service Plan
 param location string = resourceGroup().location
 param appEnv string = 'Development'
+param imageUrl string = ''
 
 var appServicePlanName = toLower('asp-${webAppName}')
 

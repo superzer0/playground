@@ -59,7 +59,7 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ env.RG_NAME }}
         template: bicep-template/webapp.bicep
-        parameters: 'webAppName=${{ env.APP_NAME }} location=${{ vars.LOCATION }} appEnv=${{ github.event.inputs.appEnv }}'
+        parameters: 'webAppName=${{ env.APP_NAME }} location=${{ vars.LOCATION }} appEnv=${{ github.event.inputs.appEnv }} imageUrl=${{ needs.call-dotnet-build.outputs.full_image_name}} '
         failOnStdErr: false
         scope: resourcegroup
 
