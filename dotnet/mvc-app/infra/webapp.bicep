@@ -19,12 +19,14 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 }
 resource appService 'Microsoft.Web/sites@2023-12-01' = {
   name: webAppName
-  kind: 'app'
+  kind:  'app'
   location: location
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
-      linuxFxVersion: 'DOTNETCORE|8.0'
+      linuxFxVersion: 'DOCKER|${imageUrl}' //  'DOTNETCORE|8.0'
+      http20Enabled: true
+      use32BitWorkerProcess: false
       appSettings: [
         {
           name: 'ASPNETCORE_ENVIRONMENT'

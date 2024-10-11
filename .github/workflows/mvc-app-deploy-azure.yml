@@ -63,13 +63,13 @@ jobs:
         failOnStdErr: false
         scope: resourcegroup
 
-    - name: ZIP artifacts
-      run: |
-        cd ./app-publish
-        zip -r ../app.zip .
+    # - name: ZIP artifacts
+    #   run: |
+    #     cd ./app-publish
+    #     zip -r ../app.zip .
 
-    - name: Publish Website to WebApp
-      uses: Azure/cli@v2
-      with:
-        inlineScript: |
-             az webapp deploy --name ${{ env.APP_NAME }} --resource-group ${{ env.RG_NAME }} --src-path ./app.zip --type zip
+    # - name: Publish Website to WebApp
+    #   uses: Azure/cli@v2
+    #   with:
+    #     inlineScript: |
+    #          az webapp deploy --name ${{ env.APP_NAME }} --resource-group ${{ env.RG_NAME }} --src-path ./app.zip --type zip
