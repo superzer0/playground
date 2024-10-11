@@ -17,6 +17,8 @@ jobs:
     permissions:
       contents:  read
       packages: write
+      attestations: write
+      id-token: write
     env:
       TEMPLATE-FILE: dotnet/mvc-app/infra/webapp.bicep
       FULL_IMAGE_NAME: 'ghcr.io/${{ github.repository }}-mvc-app:${{ github.sha  }}'
@@ -44,6 +46,7 @@ jobs:
     - name: Publish
       run: dotnet publish --output $GITHUB_WORKSPACE/app-publish --configuration Release --no-restore
       working-directory: ./dotnet/mvc-app
+# https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#labelling-container-images
     - name: Docker build
       if: ${{ inputs.dockerBuildEnabled }}
       working-directory: ./dotnet/mvc-app
