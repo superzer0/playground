@@ -1,4 +1,4 @@
-name: Build .NET with artifacts
+name: Build .NET template
 
 on:
   workflow_call:
