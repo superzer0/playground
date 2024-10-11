@@ -1,0 +1,35 @@
+name: Playground
+
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  job1:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os}}
+    outputs:
+      output1: ${{ steps.step1.outputs.test}}
+      output2: ${{ steps.step2.outputs.test}}
+    steps:
+      - id: step1
+        run: echo "test=hello" >> "$GITHUB_OUTPUT" # this adds map of
+      - id: step2
+        run: echo "test=world" >> "$GITHUB_OUTPUT"
+
+  job2:
+      runs-on: ubuntu-latest
+      needs: job1
+      steps:
+        - env:
+            out1: ${{needs.job1.outputs.output1 }}
+            out2: ${{needs.job1.outputs.output2 }}
+          run: echo "$out1 $out2"
+

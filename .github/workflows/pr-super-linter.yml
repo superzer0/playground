@@ -6,6 +6,10 @@
 # https://github.com/github/super-linter
 name: Lint Code Base
 
+concurrency:
+  cancel-in-progress: true
+  group: 'ci-linter-${{ github.ref }}'
+
 on:
   push:
     branches: [ main ]
