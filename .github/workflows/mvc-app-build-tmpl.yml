@@ -46,6 +46,7 @@ jobs:
       working-directory: ./dotnet/mvc-app
     - name: Docker build
       if: ${{ inputs.dockerBuildEnabled }}
+      working-directory: ./dotnet/mvc-app
       run: |
         docker build . --file Dockerfile --tag ${{ env.FULL_IMAGE_NAME}} \
           --label "org.opencontainers.image.source=${{ github.repositoryUrl}}" \
@@ -54,7 +55,6 @@ jobs:
     - name: Docker push
       if: ${{ inputs.dockerBuildEnabled }}
       run: docker push ${{ env.FULL_IMAGE_NAME}}
-      working-directory: ./dotnet/mvc-app
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
