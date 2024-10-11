@@ -1,4 +1,4 @@
-name: Build .NET template
+name: 🔒 mvc-app-build-tmpl.yaml
 
 on:
   workflow_call:
