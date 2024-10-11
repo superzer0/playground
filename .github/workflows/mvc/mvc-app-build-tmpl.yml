@@ -1,29 +1,18 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: build mvc-app
-defaults:
-  run:
-    shell: bash
-
-permissions:
-  contents:  read
-  deployments:  write
-  checks: write
-  id-token: write
+name: Build .NET with artifacts
 
 on:
-  workflow_dispatch: {}
-  push:
-    branches: [ main ]
-  pull_request:
-      branches:
-        - main
+  workflow_call:
+
 jobs:
   build:
-    name: Build MVC App
+    permissions:
+      contents:  read
+    env:
+      TEMPLATE-FILE: dotnet/mvc-app/infra/webapp.bicep
+    name: Build for Deployment
     runs-on: ubuntu-latest
     steps:
+    #checkout the repository
     - uses: actions/checkout@v4.2.1
       name: 'Checkout'
       with:
@@ -33,13 +22,6 @@ jobs:
       uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: 8.0.x
-    - name: Set up dependency caching for faster builds
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
     - name: Restore dependencies
       run: dotnet restore
       working-directory: ./dotnet/mvc-app
@@ -52,8 +34,11 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: app-published
+        name: app-publish
         path: '${{ github.workspace}}/app-publish'
-
-
+    - name: Upload bicep for deployment job
+      uses: actions/upload-artifact@v4
+      with:
+        name: bicep-template
+        path: ${{ env.TEMPLATE-FILE }}
 

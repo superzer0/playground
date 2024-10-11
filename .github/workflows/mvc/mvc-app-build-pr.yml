@@ -1,0 +1,17 @@
+name: Build .NET with artifacts
+
+concurrency:
+  cancel-in-progress: true
+  group: 'ci-mvc-build-${{ github.ref }}'
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-mvc-app:
+    uses: ./.github/workflows/mvc-app-build-tmpl.yml
+
+

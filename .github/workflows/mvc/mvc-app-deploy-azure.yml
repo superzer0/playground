@@ -1,61 +1,29 @@
 name: Deploy on Azure
 
 on:
-  workflow_dispatch: {}
-
-#Environment variables https://docs.github.com/en/actions/learn-github-actions/environment-variables
-env:
-  TEMPLATE-FILE: dotnet/mvc-app/infra/webapp.bicep
-
-permissions:
-  contents:  read
-  deployments:  write
-  checks: write
-  id-token: write
-
+  workflow_dispatch:
+    inputs:
+      appEnv:
+        type: choice
+        description: Application environment setting
+        options:
+          - Development
+          - Production
 jobs:
   #Build, test and publish .net web project in repository
-  deploy-build:
-    name: Build for Deployment
-    runs-on: ubuntu-latest
-    steps:
-    #checkout the repository
-    - uses: actions/checkout@v4.2.1
-      name: 'Checkout'
-      with:
-        show-progress: true
-        fetch-depth: 1
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4.0.1
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-      working-directory: ./dotnet/mvc-app
-    - name: Build
-      run: dotnet build --no-restore
-      working-directory: ./dotnet/mvc-app
-    - name: Publish
-      run: dotnet publish --output $GITHUB_WORKSPACE/app-publish --configuration Release --no-restore
-      working-directory: ./dotnet/mvc-app
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-publish
-        path: '${{ github.workspace}}/app-publish'
-      # upload the bicep template as artifacts for next job
-    - name: Upload bicep for deployment job
-      uses: actions/upload-artifact@v4
-      with:
-        name: bicep-template
-        path: ${{ env.TEMPLATE-FILE }}
-    # upload the bicep template as artifacts for next job
-
+  call-dotnet-build:
+    uses: ./.github/workflows/mvc-app-build-tmpl.yml
+    secrets: inherit
   # Use Bicep to deploy infrastructure + Publish webapp
   deploy:
+    permissions:
+      contents:  read
+      deployments:  write
+      checks: write
+      id-token: write
     name: Deploy on Azure
     runs-on: ubuntu-latest
-    needs: deploy-build
+    needs: call-dotnet-build
     env:
       APP_NAME: app-mvc-${{ vars.ENVIRONMENT }}-${{ vars.LOCATION_CODE }}
       RG_NAME: rg-mvc-app-${{ vars.ENVIRONMENT }}-${{ vars.LOCATION_CODE }}
@@ -91,7 +59,7 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ env.RG_NAME }}
         template: bicep-template/webapp.bicep
-        parameters: 'webAppName=${{ env.APP_NAME }} location=${{ vars.LOCATION }}'
+        parameters: 'webAppName=${{ env.APP_NAME }} location=${{ vars.LOCATION }} appEnv=${{ github.event.inputs.appEnv }}'
         failOnStdErr: false
         scope: resourcegroup
 
