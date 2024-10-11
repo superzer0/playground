@@ -19,7 +19,7 @@ jobs:
       packages: write
     env:
       TEMPLATE-FILE: dotnet/mvc-app/infra/webapp.bicep
-      FULL_IMAGE_NAME: 'ghcr.io/${{github.repository}}-mvc-app:${{ github.sha  }}'
+      FULL_IMAGE_NAME: 'ghcr.io/${{ github.repository }}-mvc-app:${{ github.sha  }}'
     outputs:
       full_image_name: ${{ env.FULL_IMAGE_NAME }}
     name: Build for Deployment
@@ -46,7 +46,11 @@ jobs:
       working-directory: ./dotnet/mvc-app
     - name: Docker build
       if: ${{ inputs.dockerBuildEnabled }}
-      run: docker build . --file Dockerfile --tag ${{ env.FULL_IMAGE_NAME}}
+      run: |
+        docker build . --file Dockerfile --tag ${{ env.FULL_IMAGE_NAME}} \
+          --label "org.opencontainers.image.source=${{ github.repositoryUrl}}" \
+          --label "org.opencontainers.image.description=MVC app image" \
+          --label "org.opencontainers.image.licenses=MIT"
     - name: Docker push
       if: ${{ inputs.dockerBuildEnabled }}
       run: docker push ${{ env.FULL_IMAGE_NAME}}
