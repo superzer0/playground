@@ -1,0 +1,10 @@
+tenant_id = ""
+subscription_id = ""
+environment = "dev"
+resource_location="swedencentral"
+resource_location_code = "sdc"
+resource_tags = {
+  env = "dev"
+  iac = "terraform"
+}
+ssh_pub_key_path = "<path>"
